@@ -1,0 +1,134 @@
+{% extends 'navbar.html' %} {% block title %}Game {{ game.id }} - Connection
+Row{% endblock %} {% block content %}
+
+<h1>Game {{ game.id }}</h1>
+<button class="lock-top-row" onclick="lockTopRow()">Connected top row</button>
+<button class="connect-all" onclick="connectAll()">I connected them</button>
+<hr />
+<div class="game-body">
+  <div class="game-container">
+    <!-- Up arrows at the top of each column -->
+    <div></div>
+    {% for col in range_list %}
+    <button class="arrow-btn" onclick="moveWord('up', {{ col }})">↑</button>
+    {% endfor %}
+    <div></div>
+
+    <!-- Rows with left and right arrows -->
+    {% for row in words %}
+    <button
+      class="arrow-btn"
+      onclick="moveWord('left', {{ forloop.counter0 }})"
+    >
+      ←
+    </button>
+    {% for word in row %}
+    <div
+      class="grid-item {% if forloop.parentloop.counter0 <= locked_rows_count %}locked{% endif %}"
+    >
+      {{ word }}
+    </div>
+    {% endfor %}
+    <button
+      class="arrow-btn"
+      onclick="moveWord('right', {{ forloop.counter0 }})"
+    >
+      →
+    </button>
+    {% endfor %}
+
+    <!-- Down arrows at the bottom of each column -->
+    <div></div>
+    {% for col in range_list %}
+    <button class="arrow-btn" onclick="moveWord('down', {{ col }})">↓</button>
+    {% endfor %}
+    <div></div>
+  </div>
+</div>
+
+<script>
+  function moveWord(direction, index) {
+    fetch("{% url 'make_move' game.id %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: JSON.stringify({
+        direction: direction,
+        index: index,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          updateGrid(data.words); // Update grid with the new word positions
+        }
+      });
+  }
+
+  function updateGrid(words) {
+    const gridItems = document.querySelectorAll(".grid-item");
+    let index = 0;
+    words.forEach((row) => {
+      row.forEach((word) => {
+        gridItems[index].textContent = word;
+        index++;
+      });
+    });
+  }
+
+  function lockTopRow() {
+    fetch("{% url 'lock_top_row' game.id %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          alert(data.message);
+          const topRowItems = document.querySelectorAll(".grid-item");
+          let count = 0;
+          for (let i = 0; i < topRowItems.length; i++) {
+            if (topRowItems[i].style.backgroundColor != "mediumaquamarine") {
+              topRowItems[i].style.backgroundColor = "mediumaquamarine";
+              count++;
+            }
+            if (count == 4) {
+              break;
+            }
+          }
+        } else {
+          alert("There is no connection.");
+        }
+      });
+  }
+
+  function connectAll() {
+    fetch("{% url 'connect_all' game.id %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          alert(data.message);
+          // Turn all grid items orange at once
+          const allGridItems = document.querySelectorAll(".grid-item");
+          allGridItems.forEach((item) => {
+            item.style.backgroundColor = "mediumaquamarine";
+          });
+        } else {
+          alert(data.message);
+        }
+      });
+  }
+</script>
+
+{% endblock %}

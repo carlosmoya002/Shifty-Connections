@@ -1,0 +1,15 @@
+{% extends 'navbar.html' %} {% block title %}Home - Connection Row{% endblock %}
+{% block content %}
+<h1>Available Games</h1>
+<div class="game-list">
+  {% for game in games %}
+  <div class="game-item">
+    <a href="{% url 'load_game' game.id %}">
+      <div class="game-box">
+        <p>Game {{ game.id }}</p>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

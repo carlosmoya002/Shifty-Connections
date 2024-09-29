@@ -1,0 +1,23 @@
+<!-- templates/navbar.html -->
+<!DOCTYPE html>
+<html lang="en">
+  {% load static %}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Connection Row{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}" />
+  </head>
+  <body>
+    <nav>
+      <div class="navbar">
+        <a href="{% url 'home' %}" class="nav-title">Connection Row</a>
+      </div>
+    </nav>
+    <div class="content">{% block content %} {% endblock %}</div>
+
+    {% comment %}
+    <script src="{% static 'js/script.js' %}"></script>
+    {% endcomment %}
+  </body>
+</html>
